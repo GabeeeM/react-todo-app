@@ -6,35 +6,56 @@ function App() {
   const [input, setInput] = useState("");
   const [items, setItems] = useState();
   const [list, setList] = useState([]);
+  const [cList, setCompleted] = useState([]);
   let completed = [];
   let tempList = [];
 
   const addTask = (e) => {
-    setList((list) => list.concat(input));
+    tempList = list;
+    tempList.push(input);
+    setList(tempList);
     setInput("");
-    todoList();
+    renderItems();
     e.preventDefault();
   };
 
-  const removeTask = (task) => {
-    completed.filter((x) => x !== task);
-    setList((list) => list.filter((x) => x !== task));
-    tempList.filter((x) => x !== task);
-
-    setItems(tempList.map((x) => todoDiff(x)));
+  const completeTask = (task) => {
+    completed = cList;
+    if (completed.indexOf(task) !== -1) {
+      completed.splice(completed.indexOf(task), 1);
+      setCompleted(completed);
+      renderItems();
+    } else {
+      completed.push(task);
+      setCompleted(completed);
+      renderItems();
+    }
   };
 
-  const todoList = () => {
-    tempList = list.concat(input);
-    console.log("List: " + tempList);
+  const removeTask = (task) => {
+    setList((list) => list.filter((x) => x !== task));
+    setCompleted((cList) => cList.filter((x) => x !== task));
+    tempList.filter((x) => x !== task);
+    completed.filter((x) => x !== task);
+    for (let i = 0; i < cList.length; i++) {
+      if (list.indexOf(cList[i]) !== -1) {
+        setCompleted((completed) =>
+          completed.splice(list.indexOf(completed[i]), 1)
+        );
+        completed = cList;
+      }
+    }
+    renderItems();
+  };
 
+  const renderItems = () => {
     setItems(tempList.map((x) => todoDiff(x)));
   };
 
   const todoDiff = (todo) => {
-    if (completed.length === 0) {
+    if (cList.length === 0) {
       return (
-        <li>
+        <li key={todo}>
           <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
             <div className="flex flex-row gap-[1rem] basis-1/2">
               <input
@@ -42,7 +63,7 @@ function App() {
                 className="cursor-pointer"
                 onClick={() => completeTask(todo)}
               />
-              <p key={todo}>{todo}</p>
+              <p>{todo}</p>
             </div>
             <div className="flex flex-row basis-1/2 justify-end">
               <img
@@ -58,10 +79,10 @@ function App() {
       );
     }
 
-    for (let i = 0; i < completed.length; i++) {
-      if (todo === completed[i]) {
+    for (let i = 0; i < cList.length; i++) {
+      if (todo === cList[i]) {
         return (
-          <li>
+          <li key={todo}>
             <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
               <div className="flex flex-row gap-[1rem] basis-1/2">
                 <input
@@ -71,7 +92,7 @@ function App() {
                   onClick={() => completeTask(todo)}
                 />
                 <s>
-                  <p key={todo}>{todo}</p>
+                  <p>{todo}</p>
                 </s>
               </div>
               <div className="flex flex-row basis-1/2 justify-end">
@@ -86,9 +107,9 @@ function App() {
             <hr />
           </li>
         );
-      } else if (i === completed.length - 1) {
+      } else if (i === cList.length - 1) {
         return (
-          <li>
+          <li key={todo}>
             <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
               <div className="flex flex-row gap-[1rem] basis-1/2">
                 <input
@@ -96,7 +117,7 @@ function App() {
                   className="cursor-pointer"
                   onClick={() => completeTask(todo)}
                 />
-                <p key={todo}>{todo}</p>
+                <p>{todo}</p>
               </div>
               <div className="flex flex-row basis-1/2 justify-end">
                 <img
@@ -111,18 +132,6 @@ function App() {
           </li>
         );
       }
-    }
-  };
-
-  const completeTask = (task) => {
-    if (completed.indexOf(task) !== -1) {
-      completed.splice(completed.indexOf(task), 1);
-      console.log("Completed: " + completed);
-      todoList();
-    } else {
-      completed.push(task);
-      console.log("Completed: " + completed);
-      todoList();
     }
   };
 
