@@ -1,45 +1,129 @@
 import { useState } from "react";
+import cross from "./images/icon-cross.svg";
 import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
   const [items, setItems] = useState();
   const [list, setList] = useState([]);
+  let completed = [];
+  let tempList = [];
 
   const addTask = (e) => {
-    let tempList = list.concat(input);
     setList((list) => list.concat(input));
-    console.log(tempList);
-
-    setItems(
-      tempList.map((x) => (
-        <div>
-          <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
-            <input type="checkbox" onClick={() => completeTask(x)} />
-            <li key={x}>{x}</li>
-          </div>
-          <hr />
-        </div>
-      ))
-    );
-
     setInput("");
-
+    todoList();
     e.preventDefault();
   };
 
+  const removeTask = (task) => {
+    completed.filter((x) => x !== task);
+    setList((list) => list.filter((x) => x !== task));
+    tempList.filter((x) => x !== task);
+
+    setItems(tempList.map((x) => todoDiff(x)));
+  };
+
+  const todoList = () => {
+    tempList = list.concat(input);
+    console.log("List: " + tempList);
+
+    setItems(tempList.map((x) => todoDiff(x)));
+  };
+
+  const todoDiff = (todo) => {
+    if (completed.length === 0) {
+      return (
+        <li>
+          <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+            <div className="flex flex-row gap-[1rem] basis-1/2">
+              <input
+                type="checkbox"
+                className="cursor-pointer"
+                onClick={() => completeTask(todo)}
+              />
+              <p key={todo}>{todo}</p>
+            </div>
+            <div className="flex flex-row basis-1/2 justify-end">
+              <img
+                src={cross}
+                alt="delete"
+                className="cursor-pointer"
+                onClick={() => removeTask(todo)}
+              />
+            </div>
+          </div>
+          <hr />
+        </li>
+      );
+    }
+
+    for (let i = 0; i < completed.length; i++) {
+      if (todo === completed[i]) {
+        return (
+          <li>
+            <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+              <div className="flex flex-row gap-[1rem] basis-1/2">
+                <input
+                  type="checkbox"
+                  checked
+                  className="cursor-pointer"
+                  onClick={() => completeTask(todo)}
+                />
+                <s>
+                  <p key={todo}>{todo}</p>
+                </s>
+              </div>
+              <div className="flex flex-row basis-1/2 justify-end">
+                <img
+                  src={cross}
+                  alt="delete"
+                  className="cursor-pointer"
+                  onClick={() => removeTask(todo)}
+                />
+              </div>
+            </div>
+            <hr />
+          </li>
+        );
+      } else if (i === completed.length - 1) {
+        return (
+          <li>
+            <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+              <div className="flex flex-row gap-[1rem] basis-1/2">
+                <input
+                  type="checkbox"
+                  className="cursor-pointer"
+                  onClick={() => completeTask(todo)}
+                />
+                <p key={todo}>{todo}</p>
+              </div>
+              <div className="flex flex-row basis-1/2 justify-end">
+                <img
+                  src={cross}
+                  alt="delete"
+                  className="cursor-pointer"
+                  onClick={() => removeTask(todo)}
+                />
+              </div>
+            </div>
+            <hr />
+          </li>
+        );
+      }
+    }
+  };
+
   const completeTask = (task) => {
-    return (
-      <div>
-        <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
-          <s>
-            <input type="checkbox" onClick={() => completeTask(task)} />
-            <li key={task}>{task}</li>
-          </s>
-        </div>
-        <hr />
-      </div>
-    );
+    if (completed.indexOf(task) !== -1) {
+      completed.splice(completed.indexOf(task), 1);
+      console.log("Completed: " + completed);
+      todoList();
+    } else {
+      completed.push(task);
+      console.log("Completed: " + completed);
+      todoList();
+    }
   };
 
   return (
