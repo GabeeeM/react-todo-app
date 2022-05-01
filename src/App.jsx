@@ -45,6 +45,8 @@ function App() {
         completed = cList;
       }
     }
+    //try using debugger(); here
+    debugger;
     renderItems();
   };
 
