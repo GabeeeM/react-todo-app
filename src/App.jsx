@@ -1,5 +1,6 @@
 import { useState } from "react";
 import cross from "./images/icon-cross.svg";
+import sunButton from "./images/icon-sun.svg";
 import "./App.css";
 
 function App() {
@@ -140,7 +141,20 @@ function App() {
   return (
     <div className="App">
       <div className="bg-amber-600 h-screen flex flex-col justify-center items-center">
-        <h1>Todo App</h1>
+        <div className="flex flex-row w-[20rem]">
+          <div className="basis-1/2 text-left ">
+            <h1>T O D O</h1>
+          </div>
+          <div className="basis-1/2">
+            <div
+              className="h-[1.65rem] w-[1.65rem] float-right"
+              style={{
+                background: "url(" + sunButton + ")",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
+          </div>
+        </div>
         <form onSubmit={(e) => addTask(e)}>
           <input
             type="text"
