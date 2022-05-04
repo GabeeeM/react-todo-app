@@ -1,23 +1,67 @@
 import { useState } from "react";
 import cross from "./images/icon-cross.svg";
 import sunButton from "./images/icon-sun.svg";
+import moonButton from "./images/icon-moon.svg";
+import lightBg from "./images/bg-desktop-light.jpg";
+import darkBg from "./images/bg-desktop-dark.jpg";
 import "./App.css";
 
 function App() {
+  const lightTheme = [
+    {
+      background: "url(" + moonButton + ")",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "3rem 3rem",
+    }, //moon theme button [0]
+    {
+      backgroundColor: "#fafafa",
+      backgroundImage: "url(" + lightBg + ")",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "100% auto",
+    }, //background image light [1]
+    {
+      backgroundColor: "#fafafa",
+    }, //task background light [2]
+  ];
+
+  const darkTheme = [
+    {
+      background: "url(" + sunButton + ")",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "3rem 3rem",
+    }, //sun theme button [0]
+    {
+      backgroundColor: "#181824",
+      backgroundImage: "url(" + darkBg + ")",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "100% auto",
+    }, //background image dark [1]
+    {
+      backgroundColor: "#181824",
+    }, //task background dark [2]
+  ];
+
   const [input, setInput] = useState("");
   const [items, setItems] = useState();
   const [list, setList] = useState([]);
   const [cList, setCompleted] = useState([]);
+  const [theme, setTheme] = useState(lightTheme);
   let completed = [];
   let tempList = [];
+  let gounter = 0;
 
   const addTask = (e) => {
-    tempList = list;
-    tempList.push(input);
-    setList(tempList);
-    setInput("");
-    renderItems();
-    e.preventDefault();
+    if (list.length < 10) {
+      tempList = list;
+      tempList.push(input);
+      setList(tempList);
+      setInput("");
+      renderItems();
+      e.preventDefault();
+    } else {
+      console.log("max amount of tasks reached");
+      e.preventDefault();
+    }
   };
 
   const completeTask = (task) => {
@@ -30,6 +74,16 @@ function App() {
       completed.push(task);
       setCompleted(completed);
       renderItems();
+    }
+  };
+
+  const changeTheme = () => {
+    gounter++;
+    if (gounter === 1) {
+      setTheme(darkTheme);
+    } else {
+      setTheme(lightTheme);
+      gounter = 0;
     }
   };
 
@@ -56,15 +110,19 @@ function App() {
   };
 
   const todoDiff = (todo) => {
+    let key = Math.random();
     if (cList.length === 0) {
       return (
-        <li key={todo}>
-          <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+        <li key={key}>
+          <div
+            className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
+            style={theme[2]}
+          >
             <div className="flex flex-row gap-[1rem] basis-1/2">
               <input
                 type="checkbox"
                 className="cursor-pointer"
-                onClick={() => completeTask(todo)}
+                onClick={() => completeTask(key)}
               />
               <p>{todo}</p>
             </div>
@@ -73,7 +131,7 @@ function App() {
                 src={cross}
                 alt="delete"
                 className="cursor-pointer"
-                onClick={() => removeTask(todo)}
+                onClick={() => removeTask(key)}
               />
             </div>
           </div>
@@ -85,14 +143,17 @@ function App() {
     for (let i = 0; i < cList.length; i++) {
       if (todo === cList[i]) {
         return (
-          <li key={todo}>
-            <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+          <li key={key}>
+            <div
+              className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
+              style={theme[2]}
+            >
               <div className="flex flex-row gap-[1rem] basis-1/2">
                 <input
                   type="checkbox"
                   checked
                   className="cursor-pointer"
-                  onClick={() => completeTask(todo)}
+                  onClick={() => completeTask(key)}
                 />
                 <s>
                   <p>{todo}</p>
@@ -112,8 +173,11 @@ function App() {
         );
       } else if (i === cList.length - 1) {
         return (
-          <li key={todo}>
-            <div className="bg-white p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]">
+          <li key={key}>
+            <div
+              className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
+              style={theme[2]}
+            >
               <div className="flex flex-row gap-[1rem] basis-1/2">
                 <input
                   type="checkbox"
@@ -140,32 +204,36 @@ function App() {
 
   return (
     <div className="App">
-      <div className="bg-amber-600 h-screen flex flex-col justify-center items-center">
-        <div className="flex flex-row w-[20rem]">
-          <div className="basis-1/2 text-left ">
-            <h1>T O D O</h1>
+      <div className="h-screen flex flex-col items-center" style={theme[1]}>
+        <div className="flex flex-col justify-content-center">
+          <div className="flex flex-row mb-[2rem] mt-[6rem]">
+            <div className="basis-1/2 text-left text-[3rem] text-white">
+              <h1>T O D O</h1>
+            </div>
+            <div className="basis-1/2 mt-[1rem]">
+              <div
+                className="h-[3rem] w-[3rem] float-right cursor-pointer"
+                onClick={() => changeTheme()}
+                style={theme[0]}
+              />
+            </div>
           </div>
-          <div className="basis-1/2">
-            <div
-              className="h-[1.65rem] w-[1.65rem] float-right"
-              style={{
-                background: "url(" + sunButton + ")",
-                backgroundRepeat: "no-repeat",
-              }}
-            />
+          <div className="sm:w-[40rem]">
+            <form onSubmit={(e) => addTask(e)}>
+              <input
+                className="sm:w-[40rem] p-[1rem] mb-[2rem]"
+                style={theme[2]}
+                type="text"
+                name="name"
+                value={input}
+                onChange={(x) => setInput(x.target.value)}
+                placeholder="Add a task"
+              ></input>
+            </form>
           </div>
-        </div>
-        <form onSubmit={(e) => addTask(e)}>
-          <input
-            type="text"
-            name="name"
-            value={input}
-            onChange={(x) => setInput(x.target.value)}
-            placeholder="Add a task"
-          ></input>
-        </form>
-        <div className="rounded-sm">
-          <ul>{items}</ul>
+          <div className="rounded-sm shadow-lg">
+            <ul>{items}</ul>
+          </div>
         </div>
       </div>
     </div>
