@@ -1,5 +1,6 @@
 import { useState } from "react";
 import cross from "./images/icon-cross.svg";
+// import check from "./images/icon-check.svg";
 import sunButton from "./images/icon-sun.svg";
 import moonButton from "./images/icon-moon.svg";
 import lightBg from "./images/bg-desktop-light.jpg";
@@ -10,7 +11,6 @@ function App() {
   const lightTheme = [
     {
       background: "url(" + moonButton + ")",
-      backgroundRepeat: "no-repeat",
       backgroundSize: "3rem 3rem",
     }, //moon theme button [0]
     {
@@ -27,7 +27,6 @@ function App() {
   const darkTheme = [
     {
       background: "url(" + sunButton + ")",
-      backgroundRepeat: "no-repeat",
       backgroundSize: "3rem 3rem",
     }, //sun theme button [0]
     {
@@ -37,25 +36,29 @@ function App() {
       backgroundSize: "100% auto",
     }, //background image dark [1]
     {
-      backgroundColor: "#181824",
+      backgroundColor: "#25273c",
     }, //task background dark [2]
   ];
 
   const [input, setInput] = useState("");
   const [items, setItems] = useState();
   const [list, setList] = useState([]);
-  const [cList, setCompleted] = useState([]);
   const [theme, setTheme] = useState(lightTheme);
-  let completed = [];
+  const [counter, setCounter] = useState(0);
+  const [taskCount, setTaskCount] = useState(0);
   let tempList = [];
-  let gounter = 0;
 
   const addTask = (e) => {
     if (list.length < 10) {
       tempList = list;
-      tempList.push(input);
+      tempList.push({
+        task: input,
+        key: Math.floor(Math.random() * 9999),
+        completed: false,
+      });
       setList(tempList);
       setInput("");
+      setTaskCount((task) => task + 1);
       renderItems();
       e.preventDefault();
     } else {
@@ -64,141 +67,141 @@ function App() {
     }
   };
 
-  const completeTask = (task) => {
-    completed = cList;
-    if (completed.indexOf(task) !== -1) {
-      completed.splice(completed.indexOf(task), 1);
-      setCompleted(completed);
-      renderItems();
-    } else {
-      completed.push(task);
-      setCompleted(completed);
-      renderItems();
+  const completeTask = (key) => {
+    console.log(key);
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].key === key) {
+        if (list[i].completed) {
+          list[i].completed = false;
+          setTaskCount((task) => task + 1);
+          break;
+        } else {
+          list[i].completed = true;
+          setTaskCount((task) => task - 1);
+          break;
+        }
+      }
     }
+
+    renderItems();
   };
 
   const changeTheme = () => {
-    gounter++;
-    if (gounter === 1) {
-      setTheme(darkTheme);
+    if (counter === 1) {
+      setTheme((x) => (x = darkTheme));
+      setCounter(0);
     } else {
-      setTheme(lightTheme);
-      gounter = 0;
+      setTheme((x) => (x = lightTheme));
+      setCounter(1);
     }
+
+    renderItems();
   };
 
-  const removeTask = (task) => {
-    setList((list) => list.filter((x) => x !== task));
-    setCompleted((cList) => cList.filter((x) => x !== task));
-    tempList.filter((x) => x !== task);
-    completed.filter((x) => x !== task);
-    for (let i = 0; i < cList.length; i++) {
-      if (list.indexOf(cList[i]) !== -1) {
-        setCompleted((completed) =>
-          completed.splice(list.indexOf(completed[i]), 1)
-        );
-        completed = cList;
+  const removeTask = (key) => {
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].key === key) {
+        if (!list[i].completed) {
+          setTaskCount((task) => task - 1);
+        }
+        list.splice(i, 1);
+        break;
       }
     }
-    //try using debugger(); here
-    debugger;
+
+    renderItems();
+  };
+
+  const clearComp = () => {
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].completed) {
+        list.splice(i, 1);
+        return clearComp();
+      }
+    }
+
     renderItems();
   };
 
   const renderItems = () => {
-    setItems(tempList.map((x) => todoDiff(x)));
+    setItems(list.map((x) => todoDiff(x)));
+  };
+
+  const renderActiveItems = () => {
+    setItems(list.filter((x) => x.completed === false).map((x) => todoDiff(x)));
+  };
+
+  const renderCompItems = () => {
+    setItems(list.filter((x) => x.completed === true).map((x) => todoDiff(x)));
   };
 
   const todoDiff = (todo) => {
-    let key = Math.random();
-    if (cList.length === 0) {
+    if (todo.completed) {
       return (
-        <li key={key}>
+        <li key={todo.key}>
           <div
             className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
             style={theme[2]}
           >
-            <div className="flex flex-row gap-[1rem] basis-1/2">
-              <input
-                type="checkbox"
-                className="cursor-pointer"
-                onClick={() => completeTask(key)}
-              />
-              <p>{todo}</p>
+            <div
+              className="flex flex-row gap-[1rem] basis-1/2 cursor-pointer"
+              onClick={() => completeTask(todo.key)}
+            >
+              {/* <div
+                style={{
+                  background: "url(" + check + ")",
+                }}
+              /> */}
+
+              <input type="checkbox" checked className="cursor-pointer" />
+              <s>
+                <p className="text-slate-500 text-[1.2rem]">{todo.task}</p>
+              </s>
             </div>
             <div className="flex flex-row basis-1/2 justify-end">
               <img
                 src={cross}
                 alt="delete"
                 className="cursor-pointer"
-                onClick={() => removeTask(key)}
+                onClick={() => removeTask(todo.key)}
               />
             </div>
           </div>
           <hr />
         </li>
       );
-    }
+    } else {
+      return (
+        <li key={todo.key}>
+          <div
+            className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
+            style={theme[2]}
+          >
+            <div
+              className="flex flex-row gap-[1rem] basis-1/2 cursor-pointer"
+              onClick={() => completeTask(todo.key)}
+            >
+              {/* <div
+                style={{
+                  background: "url(" + check + ")",
+                }}
+              /> */}
 
-    for (let i = 0; i < cList.length; i++) {
-      if (todo === cList[i]) {
-        return (
-          <li key={key}>
-            <div
-              className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
-              style={theme[2]}
-            >
-              <div className="flex flex-row gap-[1rem] basis-1/2">
-                <input
-                  type="checkbox"
-                  checked
-                  className="cursor-pointer"
-                  onClick={() => completeTask(key)}
-                />
-                <s>
-                  <p>{todo}</p>
-                </s>
-              </div>
-              <div className="flex flex-row basis-1/2 justify-end">
-                <img
-                  src={cross}
-                  alt="delete"
-                  className="cursor-pointer"
-                  onClick={() => removeTask(todo)}
-                />
-              </div>
+              <input type="checkbox" className="cursor-pointer" />
+              <p className="text-[1.2rem]">{todo.task}</p>
             </div>
-            <hr />
-          </li>
-        );
-      } else if (i === cList.length - 1) {
-        return (
-          <li key={key}>
-            <div
-              className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
-              style={theme[2]}
-            >
-              <div className="flex flex-row gap-[1rem] basis-1/2">
-                <input
-                  type="checkbox"
-                  className="cursor-pointer"
-                  onClick={() => completeTask(todo)}
-                />
-                <p>{todo}</p>
-              </div>
-              <div className="flex flex-row basis-1/2 justify-end">
-                <img
-                  src={cross}
-                  alt="delete"
-                  className="cursor-pointer"
-                  onClick={() => removeTask(todo)}
-                />
-              </div>
+            <div className="flex flex-row basis-1/2 justify-end">
+              <img
+                src={cross}
+                alt="delete"
+                className="cursor-pointer"
+                onClick={() => removeTask(todo.key)}
+              />
             </div>
-            <hr />
-          </li>
-        );
-      }
+          </div>
+          <hr />
+        </li>
+      );
     }
   };
 
@@ -212,7 +215,7 @@ function App() {
             </div>
             <div className="basis-1/2 mt-[1rem]">
               <div
-                className="h-[3rem] w-[3rem] float-right cursor-pointer"
+                className="h-[3rem] w-[3rem] float-right cursor-pointer bg-no-repeat"
                 onClick={() => changeTheme()}
                 style={theme[0]}
               />
@@ -233,6 +236,44 @@ function App() {
           </div>
           <div className="rounded-sm shadow-lg">
             <ul>{items}</ul>
+            <div
+              className="flex flex-row sm:w-[40rem] p-[1rem] rounded-bl-lg rounded-br-lg"
+              style={theme[2]}
+            >
+              <div className="flex basis-1/3">
+                <p className="text-neutral-500">{taskCount} items left</p>
+              </div>
+
+              <div className="flex flex-row justify-between basis-1/3">
+                <p
+                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  onClick={() => renderItems()}
+                >
+                  All
+                </p>
+                <p
+                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  onClick={() => renderActiveItems()}
+                >
+                  Active
+                </p>
+                <p
+                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  onClick={() => renderCompItems()}
+                >
+                  Completed
+                </p>
+              </div>
+
+              <div className="flex basis-1/3 justify-end">
+                <p
+                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  onClick={() => clearComp()}
+                >
+                  Clear Completed
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
