@@ -1,6 +1,6 @@
 import { useState } from "react";
 import cross from "./images/icon-cross.svg";
-// import check from "./images/icon-check.svg";
+import check from "./images/icon-check.svg";
 import sunButton from "./images/icon-sun.svg";
 import moonButton from "./images/icon-moon.svg";
 import lightBg from "./images/bg-desktop-light.jpg";
@@ -8,43 +8,42 @@ import darkBg from "./images/bg-desktop-dark.jpg";
 import "./App.css";
 
 function App() {
-  const lightTheme = [
-    {
-      background: "url(" + moonButton + ")",
-      backgroundSize: "3rem 3rem",
-    }, //moon theme button [0]
-    {
+  const lightTheme = {
+    mainBg: {
       backgroundColor: "#fafafa",
       backgroundImage: "url(" + lightBg + ")",
-      backgroundRepeat: "no-repeat",
-      backgroundSize: "100% auto",
-    }, //background image light [1]
-    {
-      backgroundColor: "#fafafa",
-    }, //task background light [2]
-  ];
+    },
 
-  const darkTheme = [
-    {
-      background: "url(" + sunButton + ")",
-      backgroundSize: "3rem 3rem",
-    }, //sun theme button [0]
-    {
+    taskBg: {
+      backgroundColor: "#fafafa",
+    },
+
+    taskText: {
+      color: "#000000",
+    },
+  };
+
+  const darkTheme = {
+    mainBg: {
       backgroundColor: "#181824",
       backgroundImage: "url(" + darkBg + ")",
-      backgroundRepeat: "no-repeat",
-      backgroundSize: "100% auto",
-    }, //background image dark [1]
-    {
+    },
+
+    taskBg: {
       backgroundColor: "#25273c",
-    }, //task background dark [2]
-  ];
+    },
+
+    taskText: {
+      color: "#bfc1d8",
+    },
+  };
 
   const [input, setInput] = useState("");
   const [items, setItems] = useState();
   const [list, setList] = useState([]);
   const [theme, setTheme] = useState(lightTheme);
-  const [counter, setCounter] = useState(0);
+  const [themeButton, setThemeButt] = useState(moonButton);
+  const [themeFlag, setTheFlag] = useState(false);
   const [taskCount, setTaskCount] = useState(0);
   let tempList = [];
 
@@ -87,15 +86,18 @@ function App() {
   };
 
   const changeTheme = () => {
-    if (counter === 1) {
-      setTheme((x) => (x = darkTheme));
-      setCounter(0);
+    if (themeFlag) {
+      setTheme(lightTheme);
+      setTheFlag(false);
+      setThemeButt(moonButton);
     } else {
-      setTheme((x) => (x = lightTheme));
-      setCounter(1);
+      setTheme(darkTheme);
+      setTheFlag(true);
+      setThemeButt(sunButton);
     }
 
     renderItems();
+    debugger;
   };
 
   const removeTask = (key) => {
@@ -141,24 +143,25 @@ function App() {
         <li key={todo.key}>
           <div
             className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
-            style={theme[2]}
+            style={theme.taskBg}
           >
             <div
-              className="flex flex-row gap-[1rem] basis-1/2 cursor-pointer"
+              className="flex flex-row gap-[1rem] basis-4/5 cursor-pointer"
               onClick={() => completeTask(todo.key)}
             >
-              {/* <div
-                style={{
-                  background: "url(" + check + ")",
-                }}
-              /> */}
-
-              <input type="checkbox" checked className="cursor-pointer" />
+              <div>
+                <div className="h-[1.5rem] w-[1.5rem] rounded-full border-2 border-gray-500 bg-gradient-to-br from-[#57ddff] to-[#c058f3]" />
+                <img
+                  src={check}
+                  alt=""
+                  className="absolute -translate-y-[16px] translate-x-[7px]"
+                />
+              </div>
               <s>
                 <p className="text-slate-500 text-[1.2rem]">{todo.task}</p>
               </s>
             </div>
-            <div className="flex flex-row basis-1/2 justify-end">
+            <div className="flex flex-row basis-1/5 justify-end">
               <img
                 src={cross}
                 alt="delete"
@@ -175,22 +178,18 @@ function App() {
         <li key={todo.key}>
           <div
             className="p-[1rem] sm:w-[40rem] flex flex-row gap-[1rem]"
-            style={theme[2]}
+            style={theme.taskBg}
           >
             <div
-              className="flex flex-row gap-[1rem] basis-1/2 cursor-pointer"
+              className="flex flex-row gap-[1rem] basis-4/5 cursor-pointer"
               onClick={() => completeTask(todo.key)}
             >
-              {/* <div
-                style={{
-                  background: "url(" + check + ")",
-                }}
-              /> */}
-
-              <input type="checkbox" className="cursor-pointer" />
-              <p className="text-[1.2rem]">{todo.task}</p>
+              <div className="h-[1.5rem] w-[1.5rem] rounded-full border-2 border-gray-500" />
+              <p className="text-[1.2rem]" style={theme.taskText}>
+                {todo.task}
+              </p>
             </div>
-            <div className="flex flex-row basis-1/2 justify-end">
+            <div className="flex flex-row basis-1/5 justify-end">
               <img
                 src={cross}
                 alt="delete"
@@ -207,25 +206,29 @@ function App() {
 
   return (
     <div className="App">
-      <div className="h-screen flex flex-col items-center" style={theme[1]}>
-        <div className="flex flex-col justify-content-center">
+      <div
+        className="bg-no-repeat bg-[20rem] sm:bg-contain w-screen h-screen flex flex-col items-center"
+        style={theme.mainBg}
+      >
+        <div className="w-[90%] sm:w-[40rem] flex flex-col justify-content-center">
           <div className="flex flex-row mb-[2rem] mt-[6rem]">
-            <div className="basis-1/2 text-left text-[3rem] text-white">
+            <div className="basis-1/2 text-left text-[2rem] sm:text-[3rem] text-white">
               <h1>T O D O</h1>
             </div>
             <div className="basis-1/2 mt-[1rem]">
-              <div
-                className="h-[3rem] w-[3rem] float-right cursor-pointer bg-no-repeat"
+              <img
+                src={themeButton}
+                alt="theme"
                 onClick={() => changeTheme()}
-                style={theme[0]}
+                className="float-right h-[2rem] sm:h-[3rem] cursor-pointer"
               />
             </div>
           </div>
-          <div className="sm:w-[40rem]">
+          <div>
             <form onSubmit={(e) => addTask(e)}>
               <input
-                className="sm:w-[40rem] p-[1rem] mb-[2rem]"
-                style={theme[2]}
+                className="w-full p-[1rem] mb-[2rem]"
+                style={theme.taskBg}
                 type="text"
                 name="name"
                 value={input}
@@ -238,27 +241,29 @@ function App() {
             <ul>{items}</ul>
             <div
               className="flex flex-row sm:w-[40rem] p-[1rem] rounded-bl-lg rounded-br-lg"
-              style={theme[2]}
+              style={theme.taskBg}
             >
               <div className="flex basis-1/3">
-                <p className="text-neutral-500">{taskCount} items left</p>
+                <p className="text-neutral-500 text-[0.5rem] sm:text-[1rem]">
+                  {taskCount} items left
+                </p>
               </div>
 
               <div className="flex flex-row justify-between basis-1/3">
                 <p
-                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
                   onClick={() => renderItems()}
                 >
                   All
                 </p>
                 <p
-                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
                   onClick={() => renderActiveItems()}
                 >
                   Active
                 </p>
                 <p
-                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
                   onClick={() => renderCompItems()}
                 >
                   Completed
@@ -267,7 +272,7 @@ function App() {
 
               <div className="flex basis-1/3 justify-end">
                 <p
-                  className="cursor-pointer hover:text-sky-400 text-neutral-500"
+                  className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
                   onClick={() => clearComp()}
                 >
                   Clear Completed
