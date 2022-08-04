@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import cross from "./images/icon-cross.svg";
 import check from "./images/icon-check.svg";
 import sunButton from "./images/icon-sun.svg";
@@ -45,6 +45,7 @@ function App() {
   const [themeButton, setThemeButt] = useState(moonButton);
   const [themeFlag, setTheFlag] = useState(false);
   const [taskCount, setTaskCount] = useState(0);
+  const [listType, setLType] = useState(0);
   let tempList = [];
 
   const addTask = (e) => {
@@ -58,7 +59,7 @@ function App() {
       setList(tempList);
       setInput("");
       setTaskCount((task) => task + 1);
-      renderItems();
+      renderItems(listType);
       e.preventDefault();
     } else {
       console.log("max amount of tasks reached");
@@ -82,7 +83,7 @@ function App() {
       }
     }
 
-    renderItems();
+    renderItems(listType);
   };
 
   const changeTheme = () => {
@@ -96,8 +97,7 @@ function App() {
       setThemeButt(sunButton);
     }
 
-    renderItems();
-    debugger;
+    renderItems(listType);
   };
 
   const removeTask = (key) => {
@@ -111,7 +111,7 @@ function App() {
       }
     }
 
-    renderItems();
+    renderItems(listType);
   };
 
   const clearComp = () => {
@@ -122,20 +122,52 @@ function App() {
       }
     }
 
-    renderItems();
+    renderItems(listType);
   };
 
-  const renderItems = () => {
-    setItems(list.map((x) => todoDiff(x)));
+  const renderItems = (style) => {
+    if (style !== listType) {
+      setLType((x) => (x = style));
+    }
+
+    switch (style) {
+      case 0:
+        setItems(list.map((x) => todoDiff(x)));
+        break;
+      case 1:
+        setItems(
+          list.filter((x) => x.completed === false).map((x) => todoDiff(x))
+        );
+        break;
+      case 2:
+        setItems(
+          list.filter((x) => x.completed === true).map((x) => todoDiff(x))
+        );
+        break;
+      default:
+        renderItems(style);
+        break;
+    }
   };
 
-  const renderActiveItems = () => {
-    setItems(list.filter((x) => x.completed === false).map((x) => todoDiff(x)));
-  };
+  useEffect(() => {
+    renderItems(listType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme]);
 
-  const renderCompItems = () => {
-    setItems(list.filter((x) => x.completed === true).map((x) => todoDiff(x)));
-  };
+  // const renderItems = () => {
+  //   setItems(list.map((x) => todoDiff(x)));
+  //   setLType((x) => (x = 0));
+  // };
+
+  // const renderActiveItems = () => {
+  //   setItems(list.filter((x) => x.completed === false).map((x) => todoDiff(x)));
+  //   setLType((x) => (x = 1));
+  // };
+
+  // const renderCompItems = () => {
+  //   setItems(list.filter((x) => x.completed === true).map((x) => todoDiff(x)));
+  // };
 
   const todoDiff = (todo) => {
     if (todo.completed) {
@@ -149,19 +181,23 @@ function App() {
               className="flex flex-row gap-[1rem] basis-4/5 cursor-pointer"
               onClick={() => completeTask(todo.key)}
             >
-              <div>
-                <div className="h-[1.5rem] w-[1.5rem] rounded-full border-2 border-gray-500 bg-gradient-to-br from-[#57ddff] to-[#c058f3]" />
-                <img
-                  src={check}
-                  alt=""
-                  className="absolute -translate-y-[16px] translate-x-[7px]"
-                />
+              <div className="flex items-center">
+                <div>
+                  <div className="h-[1.5rem] w-[1.5rem] rounded-full border-2 border-gray-500 bg-gradient-to-br from-[#57ddff] to-[#c058f3]" />
+                  <img
+                    src={check}
+                    alt=""
+                    className="absolute -translate-y-[16px] translate-x-[7px]"
+                  />
+                </div>
               </div>
               <s>
-                <p className="text-slate-500 text-[1.2rem]">{todo.task}</p>
+                <p className="text-slate-500 text-[1.2rem] break-all">
+                  {todo.task}
+                </p>
               </s>
             </div>
-            <div className="flex flex-row basis-1/5 justify-end">
+            <div className="flex flex-row basis-1/5 justify-end items-center">
               <img
                 src={cross}
                 alt="delete"
@@ -184,12 +220,14 @@ function App() {
               className="flex flex-row gap-[1rem] basis-4/5 cursor-pointer"
               onClick={() => completeTask(todo.key)}
             >
-              <div className="h-[1.5rem] w-[1.5rem] rounded-full border-2 border-gray-500" />
-              <p className="text-[1.2rem]" style={theme.taskText}>
+              <div className="flex items-center">
+                <div className="h-[1.5rem] min-w-[1.5rem] rounded-full border-2 border-gray-500" />
+              </div>
+              <p className="text-[1.2rem] break-all" style={theme.taskText}>
                 {todo.task}
               </p>
             </div>
-            <div className="flex flex-row basis-1/5 justify-end">
+            <div className="flex flex-row basis-1/5 justify-end items-center">
               <img
                 src={cross}
                 alt="delete"
@@ -252,19 +290,19 @@ function App() {
               <div className="flex flex-row justify-between basis-1/3">
                 <p
                   className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
-                  onClick={() => renderItems()}
+                  onClick={() => renderItems(0)}
                 >
                   All
                 </p>
                 <p
                   className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
-                  onClick={() => renderActiveItems()}
+                  onClick={() => renderItems(1)}
                 >
                   Active
                 </p>
                 <p
                   className="cursor-pointer text-[0.5rem] sm:text-[1rem] hover:text-sky-400 text-neutral-500"
-                  onClick={() => renderCompItems()}
+                  onClick={() => renderItems(2)}
                 >
                   Completed
                 </p>
