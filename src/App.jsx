@@ -8,6 +8,9 @@ import darkBg from "./images/bg-desktop-dark.jpg";
 import "./App.css";
 
 function App() {
+  //below are the properties for the dark and light themes, I chose to use objects instead of
+  //arrays this time because the naming convention is much easier on the eyes since I dont have to use
+  //array indices to assign certain styles to elements
   const lightTheme = {
     mainBg: {
       backgroundColor: "#fafafa",
@@ -49,13 +52,27 @@ function App() {
   let tempList = [];
 
   const addTask = (e) => {
-    if (list.length < 10) {
+    e.preventDefault();
+    setInput("");
+
+    //the limit of tasks is set at 10 to prevent any sort of weird display issues from arising, like the page going on forever vertically or something similar
+    if (
+      list.length < 10 &&
+      //i am not very familiar with regular expressions, so this is my fake regex solution to preventing empty tasks from being added
+      input
+        .split("")
+        .filter((x) => x !== " ")
+        .join("") !== ""
+    ) {
       tempList = list;
       tempList.push({
         task: input,
         key: Math.floor(Math.random() * 9999),
         completed: false,
       });
+      //tasks are assigned a random key to help differentate from each other and a flag that represents if the task is completed or not,
+      //having all the information regarding tasks stored together helps simplify the process of managing the tasks
+
       setList(tempList);
       setInput("");
       setTaskCount((task) => task + 1);
@@ -150,25 +167,16 @@ function App() {
     }
   };
 
+  //the tasks are rerendered last when the theme is updated, due to state updates being asynchronous the tasks
+  //would often not have updated themes when trying to switch between them
   useEffect(() => {
     renderItems(listType);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
-  // const renderItems = () => {
-  //   setItems(list.map((x) => todoDiff(x)));
-  //   setLType((x) => (x = 0));
-  // };
-
-  // const renderActiveItems = () => {
-  //   setItems(list.filter((x) => x.completed === false).map((x) => todoDiff(x)));
-  //   setLType((x) => (x = 1));
-  // };
-
-  // const renderCompItems = () => {
-  //   setItems(list.filter((x) => x.completed === true).map((x) => todoDiff(x)));
-  // };
-
+  //this is the main function that returns the html within the list, there are 2 separate versions that it returns
+  //based on if the completed flag is true within the task or not. A prior implementation I had was storing completed
+  //tasks in a separate array and then comparing that with the list of total tasks to see which were matching
   const todoDiff = (todo) => {
     if (todo.completed) {
       return (
@@ -210,6 +218,8 @@ function App() {
         </li>
       );
     } else {
+      //it is impossible to have dynamic styling with tailwind as the classes are predefined and static styles. I used the style attribute
+      //for anything that had to be dynamic and change at runtime such as background color or the background image
       return (
         <li key={todo.key}>
           <div
